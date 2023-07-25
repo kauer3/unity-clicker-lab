@@ -6,27 +6,28 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public int cookieCount = 0;
-    public GameObject cookieText;
-    public GameObject clickButton;
+    public float cookieCount = 0f;
+    public float cps = 0f;
+    public int cpsCost = 10;
     // public Camera cam;
     // Start is called before the first frame update
     void Start()
     {
-        cookieCount = 0;
-        // cam = GetComponent<Camera>();
-        // cam.clearFlags = CameraClearFlags.SolidColor;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if(cps > 0f)
+        {
+            cookieCount += cps * Time.deltaTime;
+            UpdateText();
+        }
         
     }
 
     public void AddCookie()
     {
-        GameObject clickButton = GameObject.Find("ClickButton");
 
         // cam.backgroundColor = Color.Lerp(Color.red, Color.blue, 0);
         // cam.backgroundColor = Color.blue;
@@ -37,20 +38,34 @@ public class GameManager : MonoBehaviour
         // clickButton.transform.Translate(pos);
         // Debug.Log(GameObject.Find("Main Camera").GetComponent<Camera>().pixelWidth.ToString());
 
-        Vector3 pos = new Vector3(Random.Range(150, 1800), Random.Range(150, 700), 0);
+        Vector3 pos = new Vector3(Random.Range(150, 1770), Random.Range(150, 800), 0);
         Quaternion angle = new Quaternion(0, 0, 0, 0);
-        clickButton.transform.SetPositionAndRotation(pos, angle);
 
+        GameObject clickButton = GameObject.Find("ClickButton");
         Animation anim = clickButton.GetComponent<Animation>();
-        anim.Stop();
-        cookieCount++;
-        UpdateCookie();
-        anim.Play("CookieAnimation" + Random.Range(1, 3));
 
+        clickButton.transform.SetPositionAndRotation(pos, angle);
+        anim.Stop();
+        anim.Play("PopAnimation" + Random.Range(1, 3));
+        cookieCount++;
+        UpdateText();
     }
 
-    private void UpdateCookie()
+    private void UpdateText()
     {
-        cookieText.GetComponent<TMP_Text>().text = "Score: " + cookieCount.ToString();
+        GameObject.Find("Scoreboard").GetComponent<TMP_Text>().text = "Cookies Collected: " + cookieCount.ToString("F0");
+    }
+
+    public void increaseCPS()
+    {
+        if(cookieCount >= cpsCost)
+        {
+            cookieCount -= cpsCost;
+            cpsCost *= 2;
+            cps++;
+            GameObject.Find("CPSText").GetComponent<TMP_Text>().text = "Buy CPS\nCost: " + cpsCost.ToString() + " Cookies";
+            UpdateText();
+            Debug.Log("Our CPS is now " + cps.ToString());
+        }
     }
 }
